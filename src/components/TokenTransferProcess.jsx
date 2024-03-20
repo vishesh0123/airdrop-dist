@@ -28,30 +28,30 @@ function TokenTransferProcess({ csvData, privateKey, token, txHash, setTxHash })
             const decimals = await erc20.decimals()
             let startingNonce = await wallet.getNonce()
 
-            // csvData.forEach(async (address, index) => {
-            //     const amount = ethers.parseUnits(address.amount, decimals);
-            //     const nonce = startingNonce + index;
-
-            //     try {
-            //         const tx = await erc20.transfer(address.address, amount, { nonce });
-            //         setTxHash(prevTxHash => [...prevTxHash, tx.hash]);
-            //     } catch (error) {
-            //         console.error(`Error with transaction for ${address.address}:`, error);
-            //     }
-            // });
-
-            for (let i = 0; i < csvData.length; i++) {
-                const address = csvData[i];
+            csvData.forEach(async (address, index) => {
                 const amount = ethers.parseUnits(address.amount, decimals);
-                const txnonce = startingNonce + i;
+                const nonce = startingNonce + index;
 
                 try {
-                    const tx = await erc20.transfer(address.address, amount, { nonce: txnonce });
+                    const tx = await erc20.transfer(address.address, amount, { nonce });
                     setTxHash(prevTxHash => [...prevTxHash, tx.hash]);
                 } catch (error) {
                     console.error(`Error with transaction for ${address.address}:`, error);
                 }
-            }
+            });
+
+            // for (let i = 0; i < csvData.length; i++) {
+            //     const address = csvData[i];
+            //     const amount = ethers.parseUnits(address.amount, decimals);
+            //     const txnonce = startingNonce + i;
+
+            //     try {
+            //         const tx = await erc20.transfer(address.address, amount, { nonce: txnonce });
+            //         setTxHash(prevTxHash => [...prevTxHash, tx.hash]);
+            //     } catch (error) {
+            //         console.error(`Error with transaction for ${address.address}:`, error);
+            //     }
+            // }
 
             // const chunkSize = 3;
             // const transactionChunks = chunkArray(csvData, chunkSize);
