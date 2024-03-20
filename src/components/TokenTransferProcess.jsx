@@ -12,22 +12,36 @@ function TokenTransferProcess({ csvData, privateKey, token, txHash, setTxHash })
             ];
 
             const provider = new ethers.JsonRpcProvider('https://base-rpc.publicnode.com')
+            
             const wallet = new ethers.Wallet(privateKey, provider)
             const erc20 = new ethers.Contract(token, erc20Abi, wallet)
             const decimals = await erc20.decimals()
             let startingNonce = await wallet.getNonce()
-            for (let i = 0; i < csvData.length; i++) {
-                const address = csvData[i];
-                const amount = ethers.parseUnits(address.amount, decimals);
-                const txnonce = startingNonce + i;
 
+            csvData.forEach(async (address, index) => {
+                const amount = ethers.parseUnits(address.amount, decimals);
+                const nonce = startingNonce + index;
+            
                 try {
-                    const tx = await erc20.transfer(address.address, amount, { nonce: txnonce });
+                    const tx = await erc20.transfer(address.address, amount, { nonce });
                     setTxHash(prevTxHash => [...prevTxHash, tx.hash]);
                 } catch (error) {
                     console.error(`Error with transaction for ${address.address}:`, error);
                 }
-            }
+            });
+
+            // for (let i = 0; i < csvData.length; i++) {
+            //     const address = csvData[i];
+            //     const amount = ethers.parseUnits(address.amount, decimals);
+            //     const txnonce = startingNonce + i;
+
+            //     try {
+            //         const tx = await erc20.transfer(address.address, amount, { nonce: txnonce });
+            //         setTxHash(prevTxHash => [...prevTxHash, tx.hash]);
+            //     } catch (error) {
+            //         console.error(`Error with transaction for ${address.address}:`, error);
+            //     }
+            // }
 
         } catch (error) {
             window.alert(error.message);
