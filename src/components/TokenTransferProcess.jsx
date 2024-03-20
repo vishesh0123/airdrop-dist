@@ -40,44 +40,44 @@ function TokenTransferProcess({ csvData, privateKey, token, txHash, setTxHash })
             //     }
             // });
 
-            // for (let i = 0; i < csvData.length; i++) {
-            //     const address = csvData[i];
-            //     const amount = ethers.parseUnits(address.amount, decimals);
-            //     const txnonce = startingNonce + i;
-
-            //     try {
-            //         const tx = await erc20.transfer(address.address, amount, { nonce: txnonce });
-            //         setTxHash(prevTxHash => [...prevTxHash, tx.hash]);
-            //     } catch (error) {
-            //         console.error(`Error with transaction for ${address.address}:`, error);
-            //     }
-            // }
-
-            const chunkSize = 3;
-            const transactionChunks = chunkArray(csvData, chunkSize);
-
-            for (let i = 0; i < transactionChunks.length; i++) {
-                const chunk = transactionChunks[i];
-                const transactionPromises = chunk.map((address, chunkIndex) => {
-                    const amount = ethers.parseUnits(address.amount, decimals);
-                    const txnonce = startingNonce + i * chunkSize + chunkIndex;
-                    return erc20.transfer(address.address, amount, { nonce: txnonce })
-                        .then(tx => {
-                            return tx.hash;
-                        })
-                        .catch(error => {
-                            return null;
-                        });
-                });
+            for (let i = 0; i < csvData.length; i++) {
+                const address = csvData[i];
+                const amount = ethers.parseUnits(address.amount, decimals);
+                const txnonce = startingNonce + i;
 
                 try {
-                    const results = await Promise.all(transactionPromises);
-                    const successfulHashes = results.filter(hash => hash !== null);
-                    setTxHash(prevTxHash => [...prevTxHash, ...successfulHashes]);
+                    const tx = await erc20.transfer(address.address, amount, { nonce: txnonce });
+                    setTxHash(prevTxHash => [...prevTxHash, tx.hash]);
                 } catch (error) {
-                    console.error("Unexpected error processing transaction chunk:", error);
+                    console.error(`Error with transaction for ${address.address}:`, error);
                 }
             }
+
+            // const chunkSize = 3;
+            // const transactionChunks = chunkArray(csvData, chunkSize);
+
+            // for (let i = 0; i < transactionChunks.length; i++) {
+            //     const chunk = transactionChunks[i];
+            //     const transactionPromises = chunk.map((address, chunkIndex) => {
+            //         const amount = ethers.parseUnits(address.amount, decimals);
+            //         const txnonce = startingNonce + i * chunkSize + chunkIndex;
+            //         return erc20.transfer(address.address, amount, { nonce: txnonce })
+            //             .then(tx => {
+            //                 return tx.hash;
+            //             })
+            //             .catch(error => {
+            //                 return null;
+            //             });
+            //     });
+
+            //     try {
+            //         const results = await Promise.all(transactionPromises);
+            //         const successfulHashes = results.filter(hash => hash !== null);
+            //         setTxHash(prevTxHash => [...prevTxHash, ...successfulHashes]);
+            //     } catch (error) {
+            //         console.error("Unexpected error processing transaction chunk:", error);
+            //     }
+            // }
 
         } catch (error) {
             window.alert(error.message);
